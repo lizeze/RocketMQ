@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <input type="text" id="username" placeholder="连接用户">
+    <input type="button" value="连接" onclick="connect()">
+
+    <input type="text" placeholder="发送内容" id="writeMsg">
+    <input type="button" value="发送" onclick="sendMsg()">
+    <div id="content"></div>
+
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript">
+    var ws = null;
+    var url = "ws://127.0.0.1:8086/socketServer/"
+    var username = $("#username").val()
+    function connect() {
+        if (username != null) {
+            $("#content").html('');
+            if ('WebSocket' in window) {
+                //ws = new WebSocket("ws://www.niezhiliang.com:8086/socketServer/"+$("#username").val());
+                ws = new WebSocket(url + $("#username").val());
+            }
+            else if ('MozWebSocket' in window) {
+                //ws = new MozWebSocket("ws://www.niezhiliang.com:8086/socketServer/"+$("#username").val());
+                ws = new MozWebSocket(url + $("#username").val());
+            }
+            else {
+                alert("该浏览器不支持websocket");
+            }
+
+
+            ws.onmessage = function (evt) {
+                var content = $("#content").html();
+                $("#content").html(content + '<div style="text-align: right;margin-bottom: 8px">\n' +
+                    '                        <p><q style="color: mediumorchid">服务端:</q><span>' + evt.data + '</span></p>\n' +
+                    '                    </div>\n' +
+                    '                    <br/>');
+            };
+
+            ws.onclose = function (evt) {
+                var content = $("#content").html();
+                $("#content").html(content + '<div style="margin-bottom: 8px">\n' +
+                    '                        <p><q style="color: coral">客户端:</q><span>连接中断</span></p>\n' +
+                    '                    </div>\n' +
+                    '                    <br/>');
+            };
+
+            ws.onopen = function (evt) {
+                $("#content").html('<div style="margin-bottom: 8px">\n' +
+                    '                        <p><q style="color: coral">客户端:</q><span>连接成功...</span></p>\n' +
+                    '                    </div>\n' +
+                    '                    <br/>');
+            };
+        } else {
+            alert("请输入您的昵称");
+        }
+    }
+
+    function sendMsg() {
+        ws.send($("#writeMsg").val());
+        var content = $("#content").html();
+        $("#content").html(content + '<div>\n' +
+            '                        <p><q style="color: coral">客户端:</q><span>' + $("#writeMsg").val() + '</span></p>\n' +
+            '                    </div>\n' +
+            '                    <br/>');
+    }    
+</script>
+
+</html>
